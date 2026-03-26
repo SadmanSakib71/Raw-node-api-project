@@ -6,12 +6,6 @@ const { handleReqRes } = require("./helpers/handleReqRes");
 
 const app = {};
 
-//configuration
-
-app.config = {
-  port: 3000,
-};
-
 //create server
 
 app.createServer = () => {
