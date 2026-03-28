@@ -9,14 +9,9 @@ const data = require("./lib/data");
 const app = {};
 
 //testing file system
-data.update(
-  "test",
-  "newFile",
-  { name: "england", language: "English" },
-  (err) => {
-    console.log(err);
-  },
-);
+data.delete("test", "newFile", (err) => {
+  console.log(err);
+});
 
 //create server
 
