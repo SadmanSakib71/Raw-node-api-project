@@ -9,9 +9,9 @@ const data = require("./lib/data");
 const app = {};
 
 //testing file system
-data.delete("test", "newFile", (err) => {
-  console.log(err);
-});
+// data.delete("test", "newFile", (err) => {
+//   console.log(err);
+// });
 
 //create server
 
