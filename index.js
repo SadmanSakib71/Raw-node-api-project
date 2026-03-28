@@ -9,9 +9,14 @@ const data = require("./lib/data");
 const app = {};
 
 //testing file system
-data.read("test", "newFile", (err, data) => {
-  console.log(err, data);
-});
+data.update(
+  "test",
+  "newFile",
+  { name: "england", language: "English" },
+  (err) => {
+    console.log(err);
+  },
+);
 
 //create server
 
