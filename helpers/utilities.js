@@ -20,7 +20,7 @@ utilities.parseJSON = (stringJSON) => {
 utilities.hashing = (string) => {
   if (typeof string === "string" && string.length > 0) {
     const hash = crypto
-      .createHmac("sha256", environments[process.env.NODE_ENV].secretKey)
+      .createHmac("sha256", environments.secretKey)
       .update(string)
       .digest("hex");
 

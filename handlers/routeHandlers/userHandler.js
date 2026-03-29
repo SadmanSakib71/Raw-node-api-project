@@ -1,5 +1,6 @@
 //dependencies
 const data = require("../../lib/data");
+const { hashing } = require("../../helpers/utilities");
 
 //module scaffolding
 const handler = {};
@@ -43,21 +44,32 @@ handler_users.post = (requestProperties, callBack) => {
 
   const tosAgreement =
     typeof requestProperties.body.tosAgreement === "boolean" &&
-    requestProperties.body.tosAgreement.trim().length > 0
+    requestProperties.body.tosAgreement === true
       ? requestProperties.body.tosAgreement
       : null;
 
-  if (firstName && lastName && phone && password & tosAgreement) {
+  if (firstName && lastName && phone && password && tosAgreement) {
     //make sure user doesn't already exist
-    data.read("users", "phone", (err, usersData) => {
+    data.read("users", phone, (err) => {
       if (err) {
         let userObject = {
           firstName,
           lastName,
           phone,
-          password,
+          password: hashing(password),
           tosAgreement,
         };
+
+        //store the user to Db
+        data.create("users", phone, userObject, (err) => {
+          if (!err) {
+            callBack("Create user successfully");
+          } else {
+            callBack(500, {
+              error: "could not create user",
+            });
+          }
+        });
       } else {
         callBack(500, {
           error: "there was a problem in server side",
