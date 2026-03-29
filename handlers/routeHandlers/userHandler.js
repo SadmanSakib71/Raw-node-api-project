@@ -1,6 +1,6 @@
 //dependencies
 const data = require("../../lib/data");
-const { hashing } = require("../../helpers/utilities");
+const { hashing, parseJSON } = require("../../helpers/utilities");
 
 //module scaffolding
 const handler = {};
@@ -85,7 +85,28 @@ handler_users.post = (requestProperties, callBack) => {
 
 //get method
 handler_users.get = (requestProperties, callBack) => {
-  callBack(200);
+  const phone =
+    typeof requestProperties.queryStringObject.phone === "string" &&
+    requestProperties.queryStringObject.phone.trim().length > 0
+      ? requestProperties.queryStringObject.phone
+      : null;
+  if (phone) {
+    data.read("users", phone, (err, data) => {
+      const userData = { ...parseJSON(data) };
+      if (!err && userData) {
+        delete userData.password;
+        callBack(200, userData);
+      } else {
+        callBack(404, {
+          error: "Requested user was not found",
+        });
+      }
+    });
+  } else {
+    callBack(404, {
+      error: "Requested user was not found",
+    });
+  }
 };
 
 //put method
