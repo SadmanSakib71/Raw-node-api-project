@@ -110,7 +110,68 @@ handler_users.get = (requestProperties, callBack) => {
 };
 
 //put method
-handler_users.put = (requestProperties, callBack) => {};
+handler_users.put = (requestProperties, callBack) => {
+  const firstName =
+    typeof requestProperties.body.firstName === "string" &&
+    requestProperties.body.firstName.trim().length > 0
+      ? requestProperties.body.firstName
+      : null;
+
+  const lastName =
+    typeof requestProperties.body.lastName === "string" &&
+    requestProperties.body.lastName.trim().length > 0
+      ? requestProperties.body.lastName
+      : null;
+
+  const phone =
+    typeof requestProperties.body.phone === "string" &&
+    requestProperties.body.phone.trim().length > 0
+      ? requestProperties.body.phone
+      : null;
+
+  const password =
+    typeof requestProperties.body.password === "string" &&
+    requestProperties.body.password.trim().length > 0
+      ? requestProperties.body.password
+      : null;
+  if (phone) {
+    if (firstName || lastName || password) {
+      //check the user
+      data.read("users", phone, (err, uData) => {
+        const userData = { ...parseJSON(uData) };
+        if (!err && userData) {
+          firstName && (userData.firstName = firstName);
+          lastName && (userData.lastName = lastName);
+          password && (userData.password = hashing(password));
+          //stor to database
+          data.update("users", phone, userData, (err) => {
+            if (!err) {
+              callBack(200, {
+                message: "user updated successfully",
+              });
+            } else {
+              callBack(500, {
+                error: "server side problem for updating",
+              });
+            }
+          });
+        } else {
+          callBack(400, {
+            error: "Your data is not found",
+          });
+        }
+      });
+    } else {
+      callBack(400, {
+        error: "You have a problem in your request",
+      });
+    }
+  } else {
+    callBack(400, {
+      error: "Invalid Phone number. Please try again",
+    });
+  }
+};
 
 //delete method
 handler_users.delete = (requestProperties, callBack) => {};
