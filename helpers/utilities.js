@@ -30,4 +30,9 @@ utilities.hashing = (string) => {
   }
 };
 
+//create random string
+utilities.createRandomString = (stringLength) => {
+  return "fsfsdgsfsa";
+};
+
 module.exports = utilities;
