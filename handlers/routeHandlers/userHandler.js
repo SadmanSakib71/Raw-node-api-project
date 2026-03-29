@@ -63,7 +63,7 @@ handler_users.post = (requestProperties, callBack) => {
         //store the user to Db
         data.create("users", phone, userObject, (err) => {
           if (!err) {
-            callBack("Create user successfully");
+            callBack(200, { message: "Create user successfully" });
           } else {
             callBack(500, {
               error: "could not create user",
