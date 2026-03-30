@@ -95,7 +95,46 @@ handler_token.get = (requestProperties, callBack) => {
 };
 
 //put method
-handler_token.put = (requestProperties, callBack) => {};
+handler_token.put = (requestProperties, callBack) => {
+  const tokenId =
+    typeof requestProperties.body.tokenId === "string" &&
+    requestProperties.body.tokenId.trim().length === 20
+      ? requestProperties.body.tokenId
+      : null;
+  const extend =
+    typeof requestProperties.body.extend === "boolean" &&
+    requestProperties.body.extend === true
+      ? true
+      : false;
+
+  if (tokenId && extend) {
+    data.read("tokens", tokenId, (err, tokenData) => {
+      const tokenObject = parseJSON(tokenData);
+      if (tokenObject.expires > Date.now()) {
+        tokenObject.expires = Date.now() + 60 * 60 * 1000;
+        data.update("tokens", tokenId, tokenObject, (err) => {
+          if (!err) {
+            callBack(200, {
+              message: "expires update successfully",
+            });
+          } else {
+            callBack(500, {
+              error: "server side problem",
+            });
+          }
+        });
+      } else {
+        callBack(400, {
+          error: "token already expired",
+        });
+      }
+    });
+  } else {
+    callBack(400, {
+      error: "there was problem in your request",
+    });
+  }
+};
 
 //delete method
 handler_token.delete = (requestProperties, callBack) => {};
