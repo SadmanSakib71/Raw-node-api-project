@@ -1,6 +1,7 @@
 //dependencies
 const data = require("../../lib/data");
 const { hashing, parseJSON } = require("../../helpers/utilities");
+const tokenHandler = require("../routeHandlers/tokenHandler");
 
 //module scaffolding
 const handler = {};

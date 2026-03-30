@@ -171,4 +171,22 @@ handler_token.delete = (requestProperties, callBack) => {
   }
 };
 
+//token verification
+handler_token.verify = (tokenId, phone, callBack) => {
+  data.read("tokens", tokenId, (err, tokenData) => {
+    if (!err && tokenData) {
+      if (
+        parseJSON(tokenData).phone === phone &&
+        parseJSON(tokenData).expires > Date.now()
+      ) {
+        callBack(true);
+      } else {
+        callBack(false);
+      }
+    } else {
+      callBack(false);
+    }
+  });
+};
+
 module.exports = handler;
