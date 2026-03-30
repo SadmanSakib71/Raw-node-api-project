@@ -137,6 +137,38 @@ handler_token.put = (requestProperties, callBack) => {
 };
 
 //delete method
-handler_token.delete = (requestProperties, callBack) => {};
+handler_token.delete = (requestProperties, callBack) => {
+  const tokenId =
+    typeof requestProperties.queryStringObject.tokenId === "string" &&
+    requestProperties.queryStringObject.tokenId.trim().length === 20
+      ? requestProperties.queryStringObject.tokenId
+      : null;
+
+  if (tokenId) {
+    data.read("tokens", tokenId, (err, userData) => {
+      if (!err && userData) {
+        data.delete("tokens", tokenId, (err) => {
+          if (!err) {
+            callBack(200, {
+              message: "token was successfully deleted",
+            });
+          } else {
+            callBack(500, {
+              error: "server side problem ",
+            });
+          }
+        });
+      } else {
+        callBack(404, {
+          error: "Requested token was not found",
+        });
+      }
+    });
+  } else {
+    callBack(400, {
+      error: "token is not valid",
+    });
+  }
+};
 
 module.exports = handler;
