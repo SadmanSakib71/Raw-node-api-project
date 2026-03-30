@@ -152,28 +152,42 @@ handler_users.put = (requestProperties, callBack) => {
       : null;
   if (phone) {
     if (firstName || lastName || password) {
-      //check the user
-      data.read("users", phone, (err, uData) => {
-        const userData = { ...parseJSON(uData) };
-        if (!err && userData) {
-          firstName && (userData.firstName = firstName);
-          lastName && (userData.lastName = lastName);
-          password && (userData.password = hashing(password));
-          //stor to database
-          data.update("users", phone, userData, (err) => {
-            if (!err) {
-              callBack(200, {
-                message: "user updated successfully",
+      //verify the token
+      let token =
+        typeof requestProperties.headerObject.token === "string"
+          ? requestProperties.headerObject.token
+          : false;
+
+      tokenHandler._token.verify(token, phone, (tokenId) => {
+        if (tokenId) {
+          //look up the user
+          data.read("users", phone, (err, uData) => {
+            const userData = { ...parseJSON(uData) };
+            if (!err && userData) {
+              firstName && (userData.firstName = firstName);
+              lastName && (userData.lastName = lastName);
+              password && (userData.password = hashing(password));
+              //stor to database
+              data.update("users", phone, userData, (err) => {
+                if (!err) {
+                  callBack(200, {
+                    message: "user updated successfully",
+                  });
+                } else {
+                  callBack(500, {
+                    error: "server side problem for updating",
+                  });
+                }
               });
             } else {
-              callBack(500, {
-                error: "server side problem for updating",
+              callBack(400, {
+                error: "Your data is not found",
               });
             }
           });
         } else {
-          callBack(400, {
-            error: "Your data is not found",
+          callBack(403, {
+            error: "Authentication error",
           });
         }
       });
