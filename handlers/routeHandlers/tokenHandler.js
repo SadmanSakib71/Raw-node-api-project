@@ -70,7 +70,29 @@ handler_token.post = (requestProperties, callBack) => {
 };
 
 //get method
-handler_token.get = (requestProperties, callBack) => {};
+handler_token.get = (requestProperties, callBack) => {
+  const tokenId =
+    typeof requestProperties.queryStringObject.tokenId === "string" &&
+    requestProperties.queryStringObject.tokenId.trim().length === 20
+      ? requestProperties.queryStringObject.tokenId
+      : null;
+  if (tokenId) {
+    data.read("tokens", tokenId, (err, tokenData) => {
+      const token = { ...parseJSON(tokenData) };
+      if (!err && token) {
+        callBack(200, token);
+      } else {
+        callBack(404, {
+          error: "Requested token was not found 2",
+        });
+      }
+    });
+  } else {
+    callBack(404, {
+      error: "Requested token was not found",
+    });
+  }
+};
 
 //put method
 handler_token.put = (requestProperties, callBack) => {};
