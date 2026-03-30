@@ -45,6 +45,17 @@ handler_token.post = (requestProperties, callBack) => {
           tokenId,
           expires,
         };
+
+        //create token
+        data.create("tokens", tokenId, tokenObject, (err) => {
+          if (!err) {
+            callBack(200, tokenObject);
+          } else {
+            callBack(500, {
+              error: "There is a problem in server side",
+            });
+          }
+        });
       } else {
         callBack(400, {
           error: "Password is not valid",

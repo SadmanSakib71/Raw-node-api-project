@@ -32,7 +32,21 @@ utilities.hashing = (string) => {
 
 //create random string
 utilities.createRandomString = (stringLength) => {
-  return "fsfsdgsfsa";
+  let length = stringLength;
+  length =
+    typeof stringLength === "number" && stringLength > 0 ? stringLength : false;
+  if (length) {
+    const possibleCharacters = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let output = "";
+    for (let i = 1; i <= length; i++) {
+      const randomChart = possibleCharacters.charAt(
+        Math.floor(Math.random() * possibleCharacters.length),
+      );
+      output += randomChart;
+    }
+    return output;
+  }
+  return false;
 };
 
 module.exports = utilities;
