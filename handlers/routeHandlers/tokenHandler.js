@@ -12,16 +12,16 @@ const handler = {};
 handler.tokenHandler = (requestProperties, callBack) => {
   const acceptMethods = ["get", "post", "put", "delete"];
   if (acceptMethods.indexOf(requestProperties.method) > -1) {
-    handler_token[requestProperties.method](requestProperties, callBack);
+    handler._token[requestProperties.method](requestProperties, callBack);
   } else {
     callBack(405);
   }
 };
 
-const handler_token = {};
+handler._token = {};
 
 //post method
-handler_token.post = (requestProperties, callBack) => {
+handler._token.post = (requestProperties, callBack) => {
   const phone =
     typeof requestProperties.body.phone === "string" &&
     requestProperties.body.phone.trim().length > 0
@@ -70,7 +70,7 @@ handler_token.post = (requestProperties, callBack) => {
 };
 
 //get method
-handler_token.get = (requestProperties, callBack) => {
+handler._token.get = (requestProperties, callBack) => {
   const tokenId =
     typeof requestProperties.queryStringObject.tokenId === "string" &&
     requestProperties.queryStringObject.tokenId.trim().length === 20
@@ -95,7 +95,7 @@ handler_token.get = (requestProperties, callBack) => {
 };
 
 //put method
-handler_token.put = (requestProperties, callBack) => {
+handler._token.put = (requestProperties, callBack) => {
   const tokenId =
     typeof requestProperties.body.tokenId === "string" &&
     requestProperties.body.tokenId.trim().length === 20
@@ -137,7 +137,7 @@ handler_token.put = (requestProperties, callBack) => {
 };
 
 //delete method
-handler_token.delete = (requestProperties, callBack) => {
+handler._token.delete = (requestProperties, callBack) => {
   const tokenId =
     typeof requestProperties.queryStringObject.tokenId === "string" &&
     requestProperties.queryStringObject.tokenId.trim().length === 20
@@ -172,7 +172,7 @@ handler_token.delete = (requestProperties, callBack) => {
 };
 
 //token verification
-handler_token.verify = (tokenId, phone, callBack) => {
+handler._token.verify = (tokenId, phone, callBack) => {
   data.read("tokens", tokenId, (err, tokenData) => {
     if (!err && tokenData) {
       if (
