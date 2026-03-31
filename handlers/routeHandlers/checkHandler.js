@@ -52,6 +52,27 @@ handler_check.post = (requestProperties, callBack) => {
     requestProperties.body.timeOutSeconds <= 5
       ? requestProperties.body.timeOutSeconds
       : false;
+
+  if (protocol && url && method && successCodes && timeOutSeconds) {
+    let token =
+      typeof requestProperties.headerObject.token === "string"
+        ? requestProperties.headerObject.token
+        : false;
+
+    //lookup the user phone by reading the token
+    data.read("tokens", token, (err, tokenData) => {
+      if (!err && tokenData) {
+      } else {
+        callBack(400, {
+          error: "Authentication problem",
+        });
+      }
+    });
+  } else {
+    callBack(400, {
+      error: "You have a problem in your request",
+    });
+  }
 };
 
 //get method
