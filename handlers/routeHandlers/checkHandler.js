@@ -1,8 +1,12 @@
 //dependencies
 const data = require("../../lib/data");
-const { hashing, parseJSON } = require("../../helpers/utilities");
+const {
+  hashing,
+  parseJSON,
+  createRandomString,
+} = require("../../helpers/utilities");
 const tokenHandler = require("./tokenHandler");
-const { ary } = require("lodash");
+const { maximumCheck } = require("../../helpers/environments");
 
 //module scaffolding
 const handler = {};
@@ -19,57 +23,122 @@ handler.checkHandler = (requestProperties, callBack) => {
 const handler_check = {};
 
 //post method
-handler_check.post = (requestProperties, callBack) => {
-  //validate inputs
-  let protocol =
+handler_check.post = (requestProperties, callback) => {
+  // validate inputs
+  const protocol =
     typeof requestProperties.body.protocol === "string" &&
     ["http", "https"].indexOf(requestProperties.body.protocol) > -1
       ? requestProperties.body.protocol
       : false;
 
-  let url =
+  const url =
     typeof requestProperties.body.url === "string" &&
     requestProperties.body.url.trim().length > 0
       ? requestProperties.body.url
       : false;
 
-  let method =
+  const method =
     typeof requestProperties.body.method === "string" &&
-    ["get", "post", "put", "delete"].indexOf(requestProperties.body.method) > -1
+    ["GET", "POST", "PUT", "DELETE"].indexOf(requestProperties.body.method) > -1
       ? requestProperties.body.method
       : false;
 
-  let successCodes =
+  const successCodes =
     typeof requestProperties.body.successCodes === "object" &&
     requestProperties.body.successCodes instanceof Array
       ? requestProperties.body.successCodes
       : false;
 
-  let timeOutSeconds =
-    typeof requestProperties.body.timeOutSeconds === "number" &&
-    requestProperties.body.timeOutSeconds % 1 === 0 &&
-    requestProperties.body.timeOutSeconds >= 1 &&
-    requestProperties.body.timeOutSeconds <= 5
-      ? requestProperties.body.timeOutSeconds
+  const timeoutSeconds =
+    typeof requestProperties.body.timeoutSeconds === "number" &&
+    requestProperties.body.timeoutSeconds % 1 === 0 &&
+    requestProperties.body.timeoutSeconds >= 1 &&
+    requestProperties.body.timeoutSeconds <= 5
+      ? requestProperties.body.timeoutSeconds
       : false;
 
-  if (protocol && url && method && successCodes && timeOutSeconds) {
-    let token =
+  if (protocol && url && method && successCodes && timeoutSeconds) {
+    const token =
       typeof requestProperties.headerObject.token === "string"
         ? requestProperties.headerObject.token
         : false;
 
-    //lookup the user phone by reading the token
-    data.read("tokens", token, (err, tokenData) => {
-      if (!err && tokenData) {
+    // lookup the user phone by reading the token
+    data.read("tokens", token, (err1, tokenData) => {
+      if (!err1 && tokenData) {
+        const userPhone = parseJSON(tokenData).phone;
+        // lookup the user data
+        data.read("users", userPhone, (err2, userData) => {
+          if (!err2 && userData) {
+            tokenHandler._token.verify(token, userPhone, (tokenIsValid) => {
+              if (tokenIsValid) {
+                const userObject = parseJSON(userData);
+                const userChecks =
+                  typeof userObject.checks === "object" &&
+                  userObject.checks instanceof Array
+                    ? userObject.checks
+                    : [];
+
+                if (userChecks.length < maximumCheck) {
+                  const checkId = createRandomString(20);
+                  const checkObject = {
+                    id: checkId,
+                    userPhone,
+                    protocol,
+                    url,
+                    method,
+                    successCodes,
+                    timeoutSeconds,
+                  };
+                  // save the object
+                  data.create("checks", checkId, checkObject, (err3) => {
+                    if (!err3) {
+                      // add check id to the user's object
+                      userObject.checks = userChecks;
+                      userObject.checks.push(checkId);
+
+                      // save the new user data
+                      data.update("users", userPhone, userObject, (err4) => {
+                        if (!err4) {
+                          // return the data about the new check
+                          callback(200, checkObject);
+                        } else {
+                          callback(500, {
+                            error: "There was a problem in the server side!",
+                          });
+                        }
+                      });
+                    } else {
+                      callback(500, {
+                        error: "There was a problem in the server side!",
+                      });
+                    }
+                  });
+                } else {
+                  callback(401, {
+                    error: "User has already reached max check limit!",
+                  });
+                }
+              } else {
+                callback(403, {
+                  error: "Authentication problem!",
+                });
+              }
+            });
+          } else {
+            callback(403, {
+              error: "User not found!",
+            });
+          }
+        });
       } else {
-        callBack(400, {
-          error: "Authentication problem",
+        callback(403, {
+          error: "Authentication problem!",
         });
       }
     });
   } else {
-    callBack(400, {
+    callback(400, {
       error: "You have a problem in your request",
     });
   }
