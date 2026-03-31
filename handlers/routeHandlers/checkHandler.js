@@ -283,6 +283,52 @@ handler_check.put = (requestProperties, callBack) => {
 };
 
 //delete method
-handler_check.delete = (requestProperties, callBack) => {};
+handler_check.delete = (requestProperties, callBack) => {
+  const checkId =
+    typeof requestProperties.queryStringObject.checkId === "string" &&
+    requestProperties.queryStringObject.checkId.trim().length === 20
+      ? requestProperties.queryStringObject.checkId
+      : false;
+
+  if (checkId) {
+    data.read("checks", checkId, (err, checkData) => {
+      if (!err && checkData) {
+        const token =
+          typeof requestProperties.headerObject.token === "string"
+            ? requestProperties.headerObject.token
+            : false;
+
+        tokenHandler._token.verify(
+          token,
+          parseJSON(checkData).phone,
+          (tokenIsValid) => {
+            if (tokenIsValid) {
+              data.delete("checks", checkId, (err) => {
+                if (!err) {
+                } else {
+                  callBack(500, {
+                    error: "server side problem can't delete",
+                  });
+                }
+              });
+            } else {
+              callBack(403, {
+                error: "Authentication error",
+              });
+            }
+          },
+        );
+      } else {
+        callBack(500, {
+          error: "Data not found in the server for delete",
+        });
+      }
+    });
+  } else {
+    callBack(400, {
+      error: "You have problem in your request",
+    });
+  }
+};
 
 module.exports = handler;
