@@ -305,6 +305,53 @@ handler_check.delete = (requestProperties, callBack) => {
             if (tokenIsValid) {
               data.delete("checks", checkId, (err) => {
                 if (!err) {
+                  data.read(
+                    "users",
+                    parseJSON(checkData).phone,
+                    (err, userData) => {
+                      const userObject = parseJSON(userData);
+                      if (!err && userData) {
+                        const userChecks =
+                          typeof userObject.checks === "object" &&
+                          userObject.checks instanceof Array
+                            ? userObject.checks
+                            : [];
+                        //remove the deleted check id from the user's list of checks
+                        const checkPosition = userChecks.indexOf(checkId);
+                        if (checkPosition > -1) {
+                          userChecks.splice(checkPosition, 1);
+                          //resave the user data
+                          userObject.checks = userChecks;
+                          data.update(
+                            "users",
+                            userObject.phone,
+                            userObject,
+                            (err) => {
+                              if (!err) {
+                                callBack(200, {
+                                  message: "successfully update users check",
+                                });
+                              } else {
+                                callBack(500, {
+                                  error:
+                                    "server side problem can't update user's checks",
+                                });
+                              }
+                            },
+                          );
+                        } else {
+                          callBack(500, {
+                            error:
+                              "the check id is not found that you wanna try to remove",
+                          });
+                        }
+                      } else {
+                        callBack(500, {
+                          error: "No data found for this user",
+                        });
+                      }
+                    },
+                  );
                 } else {
                   callBack(500, {
                     error: "server side problem can't delete",
