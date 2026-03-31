@@ -187,7 +187,100 @@ handler_check.get = (requestProperties, callBack) => {
 };
 
 //put method
-handler_check.put = (requestProperties, callBack) => {};
+handler_check.put = (requestProperties, callBack) => {
+  const checkId =
+    typeof requestProperties.body.checkId === "string" &&
+    requestProperties.body.checkId.trim().length === 20
+      ? requestProperties.body.checkId
+      : false;
+
+  const protocol =
+    typeof requestProperties.body.protocol === "string" &&
+    ["http", "https"].indexOf(requestProperties.body.protocol) > -1
+      ? requestProperties.body.protocol
+      : false;
+
+  const url =
+    typeof requestProperties.body.url === "string" &&
+    requestProperties.body.url.trim().length > 0
+      ? requestProperties.body.url
+      : false;
+
+  const method =
+    typeof requestProperties.body.method === "string" &&
+    ["GET", "POST", "PUT", "DELETE"].indexOf(requestProperties.body.method) > -1
+      ? requestProperties.body.method
+      : false;
+
+  const successCodes =
+    typeof requestProperties.body.successCodes === "object" &&
+    requestProperties.body.successCodes instanceof Array
+      ? requestProperties.body.successCodes
+      : false;
+
+  const timeoutSeconds =
+    typeof requestProperties.body.timeoutSeconds === "number" &&
+    requestProperties.body.timeoutSeconds % 1 === 0 &&
+    requestProperties.body.timeoutSeconds >= 1 &&
+    requestProperties.body.timeoutSeconds <= 5
+      ? requestProperties.body.timeoutSeconds
+      : false;
+
+  if (checkId) {
+    if (protocol || url || method || successCodes || timeoutSeconds) {
+      data.read("checks", checkId, (err, checkData) => {
+        if (!err && checkData) {
+          const checkObject = parseJSON(checkData);
+          const token =
+            typeof requestProperties.headerObject.token === "string"
+              ? requestProperties.headerObject.token
+              : false;
+
+          tokenHandler._token.verify(
+            token,
+            checkObject.phone,
+            (tokenIsValid) => {
+              if (tokenIsValid) {
+                protocol && (checkObject.protocol = protocol);
+                url && (checkObject.url = url);
+                method && (checkObject.method = method);
+                successCodes && (checkObject.successCodes = successCodes);
+                timeoutSeconds && (checkObject.timeoutSeconds = timeoutSeconds);
+
+                //store the check object
+                data.update("checks", checkId, checkObject, (err) => {
+                  if (!err) {
+                    callBack(200);
+                  } else {
+                    callBack(500, {
+                      error: "there is a problem to update the data",
+                    });
+                  }
+                });
+              } else {
+                callBack(403, {
+                  error: "Authentication error",
+                });
+              }
+            },
+          );
+        } else {
+          callBack(500, {
+            error: "Data not found in the server",
+          });
+        }
+      });
+    } else {
+      callBack(400, {
+        error: "You must provide at least one field",
+      });
+    }
+  } else {
+    callBack(400, {
+      error: "you have a problem on your request",
+    });
+  }
+};
 
 //delete method
 handler_check.delete = (requestProperties, callBack) => {};
