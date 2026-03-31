@@ -23,7 +23,7 @@ handler.checkHandler = (requestProperties, callBack) => {
 const handler_check = {};
 
 //post method
-handler_check.post = (requestProperties, callback) => {
+handler_check.post = (requestProperties, callBack) => {
   // validate inputs
   const protocol =
     typeof requestProperties.body.protocol === "string" &&
@@ -66,11 +66,11 @@ handler_check.post = (requestProperties, callback) => {
     // lookup the user phone by reading the token
     data.read("tokens", token, (err1, tokenData) => {
       if (!err1 && tokenData) {
-        const userPhone = parseJSON(tokenData).phone;
+        const phone = parseJSON(tokenData).phone;
         // lookup the user data
-        data.read("users", userPhone, (err2, userData) => {
+        data.read("users", phone, (err2, userData) => {
           if (!err2 && userData) {
-            tokenHandler._token.verify(token, userPhone, (tokenIsValid) => {
+            tokenHandler._token.verify(token, phone, (tokenIsValid) => {
               if (tokenIsValid) {
                 const userObject = parseJSON(userData);
                 const userChecks =
@@ -82,8 +82,8 @@ handler_check.post = (requestProperties, callback) => {
                 if (userChecks.length < maximumCheck) {
                   const checkId = createRandomString(20);
                   const checkObject = {
-                    id: checkId,
-                    userPhone,
+                    checkId,
+                    phone,
                     protocol,
                     url,
                     method,
@@ -98,54 +98,93 @@ handler_check.post = (requestProperties, callback) => {
                       userObject.checks.push(checkId);
 
                       // save the new user data
-                      data.update("users", userPhone, userObject, (err4) => {
+                      data.update("users", phone, userObject, (err4) => {
                         if (!err4) {
                           // return the data about the new check
-                          callback(200, checkObject);
+                          callBack(200, checkObject);
                         } else {
-                          callback(500, {
+                          callBack(500, {
                             error: "There was a problem in the server side!",
                           });
                         }
                       });
                     } else {
-                      callback(500, {
+                      callBack(500, {
                         error: "There was a problem in the server side!",
                       });
                     }
                   });
                 } else {
-                  callback(401, {
+                  callBack(401, {
                     error: "User has already reached max check limit!",
                   });
                 }
               } else {
-                callback(403, {
+                callBack(403, {
                   error: "Authentication problem!",
                 });
               }
             });
           } else {
-            callback(403, {
+            callBack(403, {
               error: "User not found!",
             });
           }
         });
       } else {
-        callback(403, {
+        callBack(403, {
           error: "Authentication problem!",
         });
       }
     });
   } else {
-    callback(400, {
+    callBack(400, {
       error: "You have a problem in your request",
     });
   }
 };
 
 //get method
-handler_check.get = (requestProperties, callBack) => {};
+handler_check.get = (requestProperties, callBack) => {
+  const checkId =
+    typeof requestProperties.queryStringObject.checkId === "string" &&
+    requestProperties.queryStringObject.checkId.trim().length === 20
+      ? requestProperties.queryStringObject.checkId
+      : false;
+
+  if (checkId) {
+    data.read("checks", checkId, (err, checkData) => {
+      if (!err && checkData) {
+        const token =
+          typeof requestProperties.headerObject.token === "string"
+            ? requestProperties.headerObject.token
+            : false;
+
+        tokenHandler._token.verify(
+          token,
+          parseJSON(checkData).phone,
+          (tokenIsValid) => {
+            if (tokenIsValid) {
+              callBack(200, parseJSON(checkData));
+            } else {
+              callBack(403, {
+                error: "Authentication error",
+              });
+            }
+          },
+        );
+      } else {
+        callBack(500, {
+          error: "Data not found in the server",
+        });
+      }
+    });
+  } else {
+    callBack(400, {
+      error: "You have problem in your request",
+    });
+  }
+};
 
 //put method
 handler_check.put = (requestProperties, callBack) => {};

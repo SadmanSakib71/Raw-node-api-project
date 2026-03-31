@@ -75,7 +75,7 @@ handler._token.get = (requestProperties, callBack) => {
     typeof requestProperties.queryStringObject.tokenId === "string" &&
     requestProperties.queryStringObject.tokenId.trim().length === 20
       ? requestProperties.queryStringObject.tokenId
-      : null;
+      : false;
   if (tokenId) {
     data.read("tokens", tokenId, (err, tokenData) => {
       const token = { ...parseJSON(tokenData) };
