@@ -9,23 +9,23 @@ const notification = {};
 //send sms to user using twilio api
 notification.sendTwilioSms = (phone, sms, callBack) => {
   //input validation
-  const phone =
+  const userPhone =
     typeof phone === "string" && phone.trim().length === 11
       ? phone.trim()
       : false;
 
   const userMsg =
-    typeof msg === "string" &&
-    msg.trim().length > 0 &&
-    msg.trim().length <= 1600
-      ? msg.trim()
+    typeof sms === "string" &&
+    sms.trim().length > 0 &&
+    sms.trim().length <= 1600
+      ? sms.trim()
       : false;
-  if (phone && userMsg) {
+  if (userPhone && userMsg) {
     //configure the request payload
     const payLoad = {
       From: twilio.fromPhone,
-      To: `+88${phone}`,
-      Body: msg,
+      To: `+88${userPhone}`,
+      Body: userMsg,
     };
     //stringify the payload
     const stringifyPayload = queryString.stringify(payLoad);

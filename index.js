@@ -4,15 +4,15 @@ const http = require("node:http");
 const { handleReqRes } = require("./helpers/handleReqRes");
 const environment = require("./helpers/environments");
 const data = require("./lib/data");
+const { sendTwilioSms } = require("./helpers/notifications");
 
 //app object - module scaffolding
 
 const app = {};
 
-//testing file system
-// data.delete("test", "newFile", (err) => {
-//   console.log(err);
-// });
+sendTwilioSms("01788539666", "My name is sakib", (e) => {
+  console.log(e, "sakib");
+});
 
 //create server
 
