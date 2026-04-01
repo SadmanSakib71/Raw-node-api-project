@@ -1,5 +1,3 @@
-//dependencies
-
 //module object - scaffolding
 
 const environments = {};
@@ -15,6 +13,8 @@ environments.staging = {
     authToken: process.env.TWILIO_AUTH_TOKEN,
   },
 };
+
+console.log(process.env.TWILIO_ACCOUNT_SID);
 
 environments.production = {
   port: 5000,
