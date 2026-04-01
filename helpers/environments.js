@@ -14,8 +14,6 @@ environments.staging = {
   },
 };
 
-console.log(process.env.TWILIO_ACCOUNT_SID);
-
 environments.production = {
   port: 5000,
   envName: "production",
