@@ -40,6 +40,21 @@ notification.sendTwilioSms = (phone, sms, callBack) => {
         "Content-Type": "application/x-www-form-urlencoded",
       },
     };
+    //instantiate the request object
+    const req = https.request(requestDetails, (res) => {
+      //got the status of sent request
+      const status = res.statusCode;
+      if (status === 200 && status === 201) {
+        callBack(false);
+      } else {
+        callBack(`The request returned was${status}`);
+      }
+      req.on("error", (e) => {
+        callBack(e);
+      });
+      req.write(stringifyPayload);
+      req.end();
+    });
   } else {
     callBack("given parameters are missing");
   }
