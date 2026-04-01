@@ -9,6 +9,9 @@ environments.staging = {
   envName: "staging",
   secretKey: "fdsfdsfdsfsd",
   maximumCheck: 5,
+  twilio: {
+    fromPhone: "",
+  },
 };
 
 environments.production = {
@@ -16,6 +19,9 @@ environments.production = {
   envName: "production",
   secretKey: "fdsfdsfdsgfffsd",
   maximumCheck: 5,
+  twilio: {
+    fromPhone: "",
+  },
 };
 
 //determine which environment was passed
