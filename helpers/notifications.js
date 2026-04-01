@@ -28,6 +28,18 @@ notification.sendTwilioSms = (phone, sms, callBack) => {
       Body: msg,
     };
     //stringify the payload
+    const stringifyPayload = queryString.stringify(payLoad);
+
+    //configure the request details
+    const requestDetails = {
+      hostname: "api.twilio.com",
+      method: "POST",
+      path: `2010-04-01/Accounts/${twilio.accountSid}/Message.json`,
+      auth: `${twilio.accountSid}:${twilio.authToken}`,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    };
   } else {
     callBack("given parameters are missing");
   }

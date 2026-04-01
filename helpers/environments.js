@@ -7,20 +7,24 @@ const environments = {};
 environments.staging = {
   port: 3000,
   envName: "staging",
-  secretKey: "fdsfdsfdsfsd",
+  secretKey: process.env.SECRET_KEY_STAGING,
   maximumCheck: 5,
   twilio: {
-    fromPhone: "",
+    fromPhone: process.env.TWILIO_FROM_PHONE,
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
   },
 };
 
 environments.production = {
   port: 5000,
   envName: "production",
-  secretKey: "fdsfdsfdsgfffsd",
+  secretKey: process.env.SECRET_KEY_PRODUCTION,
   maximumCheck: 5,
   twilio: {
-    fromPhone: "",
+    fromPhone: process.env.TWILIO_FROM_PHONE,
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
   },
 };
 
