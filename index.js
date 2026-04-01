@@ -10,10 +10,6 @@ const { sendTwilioSms } = require("./helpers/notifications");
 
 const app = {};
 
-sendTwilioSms("01788539666", "My name is sakib", (e) => {
-  console.log(e, "sakib");
-});
-
 //create server
 
 app.createServer = () => {
