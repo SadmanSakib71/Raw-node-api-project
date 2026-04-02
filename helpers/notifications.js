@@ -40,6 +40,7 @@ notifications.sendTwilioSms = (phone, msg, callback) => {
       auth: `${twilio.accountSid}:${twilio.authToken}`,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
+        // "Content-Length": Buffer.byteLength(stringifyPayload),
       },
     };
 
