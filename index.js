@@ -5,22 +5,21 @@ const { handleReqRes } = require("./helpers/handleReqRes");
 const environment = require("./helpers/environments");
 const data = require("./lib/data");
 const { sendTwilioSms } = require("./helpers/notifications");
+const server = require("./lib/server");
+const worker = require("./lib/worker");
 
 //app object - module scaffolding
 
 const app = {};
 
-//create server
+app.init = () => {
+  //start the server
+  server.init();
 
-app.createServer = () => {
-  const server = http.createServer(app.handleReqRes);
-  server.listen(environment.port, () => {
-    console.log(`server run on ${environment.port} port`);
-  });
+  //worker starts
+  worker.init();
 };
 
-//handle Request Response
+app.init();
 
-app.handleReqRes = handleReqRes;
-
-app.createServer();
+module.exports = app;
